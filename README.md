@@ -146,7 +146,7 @@ this repository contains some examples on how to use [aurelia-script] to enhance
     <div class="af-camera-area">
       <video autoplay ref="videoRef" class="af-video"></video>
       <menu class="af-camera-controls">
-        <button if.bind="!cameraStarted" class="button af-camera-control" click.delegate="startCamera(videoRef)">
+        <button if.bind="!cameraStarted" class="button af-camera-control" click.delegate="startCamera()">
           <span class="icon">
             <i class="fas fa-play"></i>
           </span>
@@ -211,8 +211,10 @@ this repository contains some examples on how to use [aurelia-script] to enhance
       try {
         await this.$media.startCamera(willUse);
       } catch (error) {
+        if (retries > -1) {
+          return this.startCamera(videoRef, !facingEnvironment, retries == 0 ? { video: true } : null, retries - 1)
+        }
         console.warn(error);
-        return this.startCamera(videoRef, !facingEnvironment, retries == 0 ? { video: true } : null, retries - 1)
       }
 
       this.cameraStarted = true;

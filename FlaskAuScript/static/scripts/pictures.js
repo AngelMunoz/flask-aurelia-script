@@ -27,8 +27,10 @@ class AfPictures {
     try {
       await this.$media.startCamera(willUse);
     } catch (error) {
+      if (retries > -1) {
+        return this.startCamera(videoRef, !facingEnvironment, retries == 0 ? { video: true } : null, retries - 1)
+      }
       console.warn(error);
-      return this.startCamera(videoRef, !facingEnvironment, retries == 0 ? { video: true } : null, retries - 1)
     }
 
     this.cameraStarted = true;
