@@ -6,8 +6,39 @@
 
 {% block content %}
 <section data-name="afPictures" class="af-pictures">
-  <video autoplay ref="videoRef" class="af-video"></video>
-  <button click.delegate="startCamera()">Start Camera</button>
+  <div class="af-camera-area">
+    <video autoplay ref="videoRef" class="af-video"></video>
+    <menu class="af-camera-controls">
+      <button if.bind="!cameraStarted" class="button af-camera-control" click.delegate="startCamera(videoRef)">
+        <span class="icon">
+          <i class="fas fa-play"></i>
+        </span>
+      </button>
+      <button if.bind="cameraStarted" class="button af-camera-control" click.delegate="takePicture()">
+        <span class="icon">
+          <i class="fas fa-camera-retro"></i>
+        </span>
+      </button>
+      <button if.bind="cameraStarted" class="button af-camera-control" click.delegate="switchCamera()">
+        <span class="icon">
+          <i class="fas fa-exchange-alt"></i>
+        </span>
+      </button>
+      <button if.bind="cameraStarted" class="button af-camera-control" click.delegate="stopCamera()">
+        <span class="icon">
+          <i class="far fa-stop-circle"></i>
+        </span>
+      </button>
+    </menu>
+  </div>
+
+  <ul if.bind="pictures.length > 0" class="af-img-list">
+    <li repeat.for="picture of pictures">
+      <figure class="image is-128x128">
+        <img src.bind="picture.src">
+      </figure>
+    </li>
+  </ul>
 </section>
 
 {% endblock %}

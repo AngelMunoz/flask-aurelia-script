@@ -2,9 +2,39 @@
   display: flex;
   flex-direction: column;
   margin: auto;
+  justify-content: center;
+  align-items: center;
 }
 
 .af-video {
   height: 400px;
   width: 600px;
+}
+
+.af-camera-area {
+  display: flex;
+  flex-direction: column;
+}
+
+.af-camera-controls {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 0;
+  position: relative;
+  bottom: 65px;
+}
+
+.af-camera-control {
+  background-color: rgba(0, 0, 0, 0.25);
+  color: white;
+  border-radius: 25%;
+}
+
+.af-img-list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap-reverse;
+  justify-content: space-around;
 }

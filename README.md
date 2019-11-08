@@ -2,6 +2,7 @@
 
 [aurelia-script]: https://github.com/aurelia/script
 [pipenv]: https://pipenv.readthedocs.io/en/latest/
+[aurelia-validation]: https://aurelia.io/docs/plugins/validation/
 - Do you have non javascript/node server side rendered website?
 - Do you need to update an old jquery based flask website?
 
@@ -19,10 +20,6 @@ this repository contains some examples on how to use [aurelia-script] to enhance
   {% extends "layout.html" %}
 
   {% block content %}
-
-  <h2>{{ title }}.</h2>
-  <h3>{{ message }}</h3>
-  {% if not sent %}
   <section data-name="afContact">
     <form 
         if.bind="!sent" 
@@ -59,11 +56,18 @@ this repository contains some examples on how to use [aurelia-script] to enhance
   {% block scripts %}
   <script type="module">
   class AfContact {
-
+    /**
+     * classic aurelia DI also worlks!
+     */
     static inject() {
       return [au.validation.ValidationControllerFactory]
     }
 
+    /**
+     * by using the static inject above you are able to work with your
+     * usual constructor DI wich is very good way to manage your class
+     * dependencies
+     */
     constructor(validationFactory) {
       this.email = '';
       this.name = '';
@@ -78,20 +82,20 @@ this repository contains some examples on how to use [aurelia-script] to enhance
       return 100 - this.message.length;
     }
 
-    async onSubmit(errors) {
+    async onSubmit() {
       try {
-        var response = await fetch('/contact', {
-          method: 'POST',
-          headers: {
-            'content-type': 'application/json'
-          },
-          body: JSON.stringify({
+        const body = {
             name: this.name,
             email: this.email,
             message: this.message
-          }),
-          redirect: "follow"
-        }).then(res => res.json())
+        };
+
+        var response = await fetch('/contact', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(body)
+        })
+        .then(res => res.json())
         this.sent = true;
       } catch (error) {
         console.warn(error);
@@ -103,23 +107,26 @@ this repository contains some examples on how to use [aurelia-script] to enhance
   au.enhance({
     host: document.querySelector('[data-name="afContact"'),
     root: AfContact,
-    plugins: [au.validation.configure]
-  }).then(() => {
-    var ret = au.validation.ValidationRules
-      .ensure('email')
-      .email()
-      .required()
-      .ensure('name')
-      .required()
-      .minLength(3)
-      .ensure('message')
-      .minLength(100)
-      .maxLength(200)
-      .required()
-      .ensure('readPolicy')
-      .required()
-      .on(AfContact);
-  });
+    plugins: [au.validation.configure],
+    debug: true
+  })
+    .then(() => {
+      au.validation
+        .ValidationRules
+        .ensure('email')
+        .email()
+        .required()
+        .ensure('name')
+        .required()
+        .minLength(3)
+        .ensure('message')
+        .minLength(100)
+        .maxLength(200)
+        .required()
+        .ensure('readPolicy')
+        .required()
+        .on(AfContact);
+    });
 
   </script>
   {% endblock %}
@@ -134,15 +141,41 @@ this repository contains some examples on how to use [aurelia-script] to enhance
   
   ```hbs
   {% extends "layout.html" %}
-
-  {% block styles %}
-  <link rel="stylesheet" href="/static/styles/pictures.css">
-  {% endblock %}
-
   {% block content %}
   <section data-name="afPictures" class="af-pictures">
-    <video autoplay ref="videoRef" class="af-video"></video>
-    <button click.delegate="startCamera()">Start Camera</button>
+    <div class="af-camera-area">
+      <video autoplay ref="videoRef" class="af-video"></video>
+      <menu class="af-camera-controls">
+        <button if.bind="!cameraStarted" class="button af-camera-control" click.delegate="startCamera(videoRef)">
+          <span class="icon">
+            <i class="fas fa-play"></i>
+          </span>
+        </button>
+        <button if.bind="cameraStarted" class="button af-camera-control" click.delegate="takePicture()">
+          <span class="icon">
+            <i class="fas fa-camera-retro"></i>
+          </span>
+        </button>
+        <button if.bind="cameraStarted" class="button af-camera-control" click.delegate="switchCamera()">
+          <span class="icon">
+            <i class="fas fa-exchange-alt"></i>
+          </span>
+        </button>
+        <button if.bind="cameraStarted" class="button af-camera-control" click.delegate="stopCamera()">
+          <span class="icon">
+            <i class="far fa-stop-circle"></i>
+          </span>
+        </button>
+      </menu>
+    </div>
+
+    <ul if.bind="pictures.length > 0" class="af-img-list">
+      <li repeat.for="picture of pictures">
+        <figure class="image is-128x128">
+          <img src.bind="picture.src">
+        </figure>
+      </li>
+    </ul>
   </section>
 
   {% endblock %}
@@ -154,26 +187,77 @@ this repository contains some examples on how to use [aurelia-script] to enhance
   class AfPictures {
 
     constructor() {
-      /**
-       * @type {HTMLVideoElement}
-       */
       this.videoRef = null;
+      this.cameraStarted = false;
+      this.pictures = [];
+      this.facingEnvironment = true;
     }
 
-    attached() {
+    /**
+     * starts the camera stream trying to first use the rear camera
+     * if not it tries to use the front camera if we're out of retries
+     * it ends up using the most basic media constraing for video which is `{ video: true }`
+     * @param {boolean} facingEnvironment 
+     * @param {MediaStreamConstraints} constraints 
+     * @param {number} retries 
+     */
+    async startCamera(facingEnvironment = this.facingEnvironment, constraints = null, retries = 2) {
+      if (!this.$media) { this._configureMediaService() }
+
+      const willUse = constraints || {
+        video: { facingMode: { exact: facingEnvironment ? 'environment' : 'user' } }
+      }
+
+      try {
+        await this.$media.startCamera(willUse);
+      } catch (error) {
+        console.warn(error);
+        return this.startCamera(videoRef, !facingEnvironment, retries == 0 ? { video: true } : null, retries - 1)
+      }
+
+      this.cameraStarted = true;
+      this.facingEnvironment = facingEnvironment;
+    }
+
+    async switchCamera() {
+      try {
+        await this.startCamera(!this.facingEnvironment);
+      } catch (error) {
+        console.warn(error.message)
+      }
+    }
+
+    async stopCamera() {
+      try {
+        await this.$media.stopCamera();
+        this.cameraStarted = false;
+      } catch (error) {
+        console.warn(error.message);
+      }
+    }
+
+    async takePicture() {
+      try {
+        const src = await this.$media.takeScreenshot();
+        this.pictures.push({ id: this._getRandomHex(), src });
+      } catch (error) {
+        console.warn(error.message);
+      }
+    }
+
+    /**
+     *
+     * @param {HTMLVideoElement} videoRef
+     */
+    _configureMediaService(videoRef = null) {
       /**
        * @type {MediaService}
        */
-      this.$media = new MediaService(this.videoRef);
+      this.$media = new MediaService(videoRef || this.videoRef);
     }
 
-    async startCamera() {
-      if (!this.$media) { this.attached(); }
-      try {
-        await this.$media.startCamera({ video: true });
-      } catch (error) {
-        console.warn(error);
-      }
+    _getRandomHex() {
+      return "000000".replace(/0/g, () => (~~(Math.random() * 16)).toString(16));
     }
   }
 
