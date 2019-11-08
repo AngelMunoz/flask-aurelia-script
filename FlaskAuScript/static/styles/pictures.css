@@ -1,0 +1,10 @@
+.af-pictures  {
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+}
+
+.af-video {
+  height: 400px;
+  width: 600px;
+}

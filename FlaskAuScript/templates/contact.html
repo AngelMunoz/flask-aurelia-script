@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<h2>{{ title }}.</h2>
+<h3>{{ message }}</h3>
+{% if not sent %}
+<section data-name="afContact">
+  <form if.bind="!sent" submit.trigger="onSubmit(formErrors)" action="/contact" method="POST">
+    <div class="field" validation-errors.bind='nameErrors'>
+      <label class="label" for="name">Name</label>
+      <div class="control">
+        <input class="input ${nameErrors.length > 0 ? 'is-danger' : ''}" placeholder="Let us know your name" type="text"
+          name="name" id="name" value.bind="name & validate" required>
+      </div>
+      <p if.bind='nameErrors.length > 0' class="help has-text-danger" repeat.for="errorInfo of nameErrors">
+        ${errorInfo.error.message}
+      </p>
+    </div>
+    <div class="field" validation-errors.bind='emailErrors'>
+      <label class="label" for="email">Email</label>
+      <div class="control">
+        <input class="input ${emailErrors.length > 0  ? 'is-danger' : ''}" placeholder="Where can we get back at you?"
+          type="email" name="email" id="email" value.bind="email & validate" required>
+      </div>
+      <p if.bind='emailErrors.length > 0' class="help has-text-danger" repeat.for="errorInfo of emailErrors">
+        ${errorInfo.error.message}
+      </p>
+    </div>
+    <div class="field" validation-errors.bind='messageErrors'>
+      <label class="label" for="message">Contact Reason</label>
+      <div class="control">
+        <textarea class="textarea ${messageErrors.length > 0  ? 'is-danger' : ''}"
+          placeholder="Please let us know why are you contacting us" name="message" id="message" cols="30" rows="10"
+          value.bind="message & validate" minlength="100" maxlength="200" required></textarea>
+      </div>
+      <p class="help" if.bind="counter <= 100 && counter >= 0">${counter}</p>
+      <p if.bind='messageErrors.length > 0' class="help has-text-danger" repeat.for="errorInfo of messageErrors">
+        ${errorInfo.error.message}
+      </p>
+    </div>
+    <div class="field">
+      <div class="control">
+        <label class="checkbox">
+          <input type="checkbox" checked.bind="readPolicy" required>
+          I have read the <a href="https://lipsum.com/feed/html" target="_blank" rel="noopener noreferrer">Fake Privacy
+            Policy</a>
+        </label>
+      </div>
+    </div>
+    <div class="field is-grouped">
+      <div class="control">
+        <button class="button is-link" type="submit">Submit</button>
+      </div>
+      <div class="control">
+        <button class="button is-link is-light" type="reset">Cancel</button>
+      </div>
+    </div>
+  </form>
+  <h1 if.bind="sent && responseMessage">${responseMessage}</h1>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src='https://unpkg.com/aurelia-validation@1.5.0'></script>
+<script src="/static/scripts/contact.js" type="module"></script>
+{% endblock %}

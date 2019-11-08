@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="/static/styles/pictures.css">
+{% endblock %}
+
+{% block content %}
+<section data-name="afPictures" class="af-pictures">
+  <video autoplay ref="videoRef" class="af-video"></video>
+  <button click.delegate="startCamera()">Start Camera</button>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/scripts/pictures.js" type="module"></script>
+{% endblock %}

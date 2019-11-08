@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block header %}
+
+<h1>Este es el header</h1>
+<h5>{{ prro }}</h5>
+{% endblock %}
+
+{% block content %}
+
+<h2>{{ title }}.</h2>
+<h3>{{ message }}</h3>
+
+<p>Use this area to provide additional information.</p>
+
+<section class="form-container">
+  <form submit.trigger="onSubmit()">
+    <label>Selecciona un numero!</label>
+    <input type="number" name="numero" required value.bind="numero" />
+    <button>Enviar</button>
+  </form>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/scripts/about/index.js" type="module"></script>
+{% endblock %}
