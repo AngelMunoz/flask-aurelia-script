@@ -215,6 +215,7 @@ this repository contains some examples on how to use [aurelia-script] to enhance
           return this.startCamera(videoRef, !facingEnvironment, retries == 0 ? { video: true } : null, retries - 1)
         }
         console.warn(error);
+        return;
       }
 
       this.cameraStarted = true;
