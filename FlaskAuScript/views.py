@@ -40,8 +40,7 @@ def about():
     """Renders the about page."""
     return render_template('about.html',
                            title='About',
-                           message='Your application description page.',
-                           prro="AAAAAAA Prro trais el piton")
+                           message='Your application description page.')
 
 
 @app.route('/pictures')

@@ -1,11 +1,5 @@
 {% extends "layout.html" %}
 
-{% block header %}
-
-<h1>Este es el header</h1>
-<h5>{{ prro }}</h5>
-{% endblock %}
-
 {% block content %}
 
 <h2>{{ title }}.</h2>
@@ -15,14 +9,20 @@
 
 <section class="form-container">
   <form submit.trigger="onSubmit()">
-    <label>Selecciona un numero!</label>
-    <input type="number" name="numero" required value.bind="numero" />
-    <button>Enviar</button>
+    <section class="field">
+      <label class="label">Select a number!</label>
+      <div class="control">
+        <input class="input" type="number" name="number" required value.bind="number" />
+      </div>
+    </section>
+    <div class="control">
+      <button class="button">Submit</button>
+    </div>
   </form>
 </section>
 
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/scripts/about/index.js" type="module"></script>
+<script src="/static/scripts/about.js" type="module"></script>
 {% endblock %}
